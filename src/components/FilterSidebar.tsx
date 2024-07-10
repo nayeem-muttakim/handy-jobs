@@ -4,8 +4,21 @@ import Select from "@/components/ui/select";
 import { jobTypes } from "@/lib/job-types";
 import prisma from "@/lib/prisma";
 import { Button } from "./ui/button";
+import { jobFilterSchema } from "@/lib/validation";
+import { redirect } from "next/navigation";
 async function filter(formData: FormData) {
   "use server";
+  const values = Object.fromEntries(formData.entries());
+
+  const { query, type, location, remote } = jobFilterSchema.parse(values);
+
+  const searchParams = new URLSearchParams({
+    ...(query && { query: query.trim() }),
+    ...(type && { type }),
+    ...(location && { location }),
+    ...(remote && { remote: "true" }),
+  });
+  redirect(`/?${searchParams.toString()}`);
 }
 
 const FilterSidebar = async () => {
@@ -58,7 +71,7 @@ const FilterSidebar = async () => {
             />
             <Label htmlFor="remote">Remote Jobs</Label>
           </div>
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full bg-violet-700">
             Filter Jobs
           </Button>
         </div>
